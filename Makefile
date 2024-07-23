@@ -7,10 +7,10 @@ linked_list : linked_list.out
 	./debug/linked_list
 
 
-binary_search.out: memalloc.o
-	gcc out/memalloc.o examples/binary_search.c -o debug/binary_search
-binary_search: binary_search.out
-	./debug/binary_search
+binary_tree.out: memalloc.o
+	gcc out/memalloc.o examples/binary_tree.c -o debug/binary_tree
+binary_tree: binary_tree.out
+	./debug/binary_tree
 
 
 
