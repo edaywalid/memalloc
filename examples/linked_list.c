@@ -1,6 +1,5 @@
 #include "../memalloc.h"
 #include <stdio.h>
-#include <stdlib.h>
 
 typedef struct Node *list;
 typedef struct Node {
@@ -18,7 +17,7 @@ list push(list *root, int val) {
 
 int pop(list *root) {
   if (root == NULL) {
-    exit(1);
+    return -1;
   }
   int val = (*root)->val;
   list tmp = *root;
