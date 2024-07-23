@@ -43,3 +43,29 @@ void *malloc(size_t size) {
 
   return (void *)(header + 1);
 }
+
+void free(void *ptr) {
+  if (!ptr) {
+    return;
+  }
+
+  union Header *header = (union Header *)(ptr - 1);
+  void *programbreak = sbrk(0);
+
+  if ((char *)ptr + header->s.size == programbreak) {
+    if (head == tail) {
+      head = tail = NULL;
+    } else {
+      union Header *current = head;
+      while (current) {
+        if (current->s.next == tail) {
+          current->s.next = NULL;
+          tail = current;
+        }
+        current = current->s.next;
+      }
+    }
+    sbrk(0 - sizeof(union Header) - header->s.size);
+    return;
+  }
+}
