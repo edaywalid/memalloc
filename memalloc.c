@@ -7,7 +7,16 @@ union Header *head = NULL, *tail = NULL;
 union Header *find_free_block(size_t bsize) {
   union Header *current = head;
   while (current) {
-    if (current->s.free && current->s.size == bsize) {
+      if (current->s.free && current->s.size >= bsize) {
+          if (current->s.size > bsize + sizeof(union Header)) {
+              union Header *new_block = (union Header *)((char *)current + bsize + sizeof(union Header));
+              new_block->s.size = current->s.size - bsize - sizeof(union Header);
+              new_block->s.free = 1;
+              new_block->s.next = current->s.next;
+
+              current->s.size = bsize;
+              current->s.next = new_block;
+          }
       return current;
     }
     current = current->s.next;
