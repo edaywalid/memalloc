@@ -1,21 +1,55 @@
-memalloc.o:
-	gcc -c memalloc.c -o out/memalloc.o
+CC = gcc
+CFLAGS = -Wall -Wextra -g
+OUT_DIR = out
+DEBUG_DIR = debug
+SRC_DIR = .
+EXAMPLES_DIR = examples
+TESTS_DIR = tests
 
-linked_list.out: memalloc.o
-	gcc out/memalloc.o examples/linked_list.c -o debug/linked_list
-linked_list : linked_list.out
-	./debug/linked_list
+MEMALLOC_SRC = $(SRC_DIR)/memalloc.c
+MEMALLOC_OBJ = $(OUT_DIR)/memalloc.o
 
+LINKED_LIST_SRC = $(EXAMPLES_DIR)/linked_list.c
+BINARY_TREE_SRC = $(EXAMPLES_DIR)/binary_tree.c
+DIRECTED_GRAPH_SRC = $(EXAMPLES_DIR)/directed_graph.c
 
-binary_tree.out: memalloc.o
-	gcc out/memalloc.o examples/binary_tree.c -o debug/binary_tree
-binary_tree: binary_tree.out
-	./debug/binary_tree
+TEST_MEMALLOC_SRC = $(TESTS_DIR)/test_memalloc.c
 
+LINKED_LIST_BIN = $(DEBUG_DIR)/linked_list
+BINARY_TREE_BIN = $(DEBUG_DIR)/binary_tree
+DIRECTED_GRAPH_BIN = $(DEBUG_DIR)/directed_graph
+TEST_MEMALLOC_BIN = $(DEBUG_DIR)/test_memalloc
 
+all: $(MEMALLOC_OBJ) linked_list binary_tree directed_graph
 
-directed_graph.out: memalloc.o
-	gcc out/memalloc.o examples/directed_graph.c -o debug/directed_graph
-directed_graph: directed_graph.out 
-	./debug/directed_graph
+$(MEMALLOC_OBJ): $(MEMALLOC_SRC)
+	@mkdir -p $(OUT_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+linked_list: $(MEMALLOC_OBJ)
+	@mkdir -p $(DEBUG_DIR)
+	$(CC) $(CFLAGS) $(MEMALLOC_OBJ) $(LINKED_LIST_SRC) -o $(LINKED_LIST_BIN)
+	@echo "Linked List example compiled successfully."
+
+binary_tree: $(MEMALLOC_OBJ)
+	@mkdir -p $(DEBUG_DIR)
+	$(CC) $(CFLAGS) $(MEMALLOC_OBJ) $(BINARY_TREE_SRC) -o $(BINARY_TREE_BIN)
+	@echo "Binary Tree example compiled successfully."
+
+directed_graph: $(MEMALLOC_OBJ)
+	@mkdir -p $(DEBUG_DIR)
+	$(CC) $(CFLAGS) $(MEMALLOC_OBJ) $(DIRECTED_GRAPH_SRC) -o $(DIRECTED_GRAPH_BIN)
+	@echo "Directed Graph example compiled successfully."
+
+test_memalloc: $(MEMALLOC_OBJ)
+	@mkdir -p $(DEBUG_DIR)
+	$(CC) $(CFLAGS) $(MEMALLOC_OBJ) $(TEST_MEMALLOC_SRC) -o $(TEST_MEMALLOC_BIN)
+	@echo "Unit tests compiled successfully."
+	@./$(TEST_MEMALLOC_BIN)
+
+clean:
+	@rm -rf $(OUT_DIR) $(DEBUG_DIR)
+	@echo "Cleaned up build artifacts."
+
+.PHONY: all linked_list binary_tree directed_graph test_memalloc clean
 
