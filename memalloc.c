@@ -27,6 +27,15 @@ void print_memory_stats() {
     printf("Total Free: %zu bytes\n", total_free);
 }
 
+void print_memory_layout() {
+  union Header *current = head;
+  printf("Memory Layout:\n");
+  while (current) {
+      printf("Block at %p | Size: %zu | Free: %d\n", (void *)current, current->s.size, current->s.free);
+      current = current->s.next;
+  }
+}
+
 union Header *find_free_block(size_t bsize) {
   union Header *current = head;
   while (current) {
