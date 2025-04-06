@@ -1,6 +1,11 @@
 #include "./memalloc.h"
 #include "stdlib.h"
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <pthread.h>
+
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 union Header *head = NULL, *tail = NULL;
 
@@ -55,15 +60,17 @@ union Header *find_free_block(size_t bsize) {
               current->s.size = bsize;
               current->s.next = new_block;
           }
-      return current;
-    }
-    current = current->s.next;
+          return current;
+      }
+      current = current->s.next;
   }
   return NULL;
 }
 
 void *malloc(size_t size) {
+  pthread_mutex_lock(&lock);
   if (!size) {
+    pthread_mutex_unlock(&lock);
     return NULL;
   }
   size_t full_size = size + sizeof(union Header);
@@ -71,6 +78,7 @@ void *malloc(size_t size) {
   union Header *header = find_free_block(size);
   if (header) {
     header->s.free = 0;
+    pthread_mutex_unlock(&lock);
     return (void *)(header + 1);
   }
 
@@ -88,11 +96,14 @@ void *malloc(size_t size) {
   }
   tail = header;
 
+  pthread_mutex_unlock(&lock);
   return (void *)(header + 1);
 }
 
 void free(void *ptr) {
+  pthread_mutex_lock(&lock);
   if (!ptr) {
+    pthread_mutex_unlock(&lock);
     return;
   }
 
@@ -113,6 +124,39 @@ void free(void *ptr) {
       }
     }
     sbrk(0 - sizeof(union Header) - header->s.size);
+    pthread_mutex_unlock(&lock);
     return;
   }
+  pthread_mutex_unlock(&lock);
+}
+
+void *realloc(void *ptr, size_t new_size) {
+    if (!ptr) {
+        return malloc(new_size); 
+    }
+    if (new_size == 0) {
+        free(ptr); 
+        return NULL;
+    }
+
+    union Header *header = (union Header *)ptr - 1;
+    if (header->s.size >= new_size) {
+        return ptr; 
+    }
+
+    void *new_ptr = malloc(new_size);
+    if (new_ptr) {
+        memcpy(new_ptr, ptr, header->s.size - sizeof(union Header)); 
+        free(ptr);
+    }
+    return new_ptr;
+}
+
+void *calloc(size_t num, size_t size) {
+    size_t total_size = num * size;
+    void *ptr = malloc(total_size);
+    if (ptr) {
+        memset(ptr, 0, total_size); 
+    }
+    return ptr;
 }
