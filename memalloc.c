@@ -36,6 +36,12 @@ void print_memory_layout() {
   }
 }
 
+
+
+size_t align(size_t size, size_t alignment) {
+    return (size + alignment - 1) & ~(alignment - 1);
+}
+
 union Header *find_free_block(size_t bsize) {
   union Header *current = head;
   while (current) {
