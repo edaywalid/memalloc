@@ -4,6 +4,29 @@
 
 union Header *head = NULL, *tail = NULL;
 
+size_t total_allocated = 0;
+size_t total_free = 0;
+
+void update_memory_stats() {
+    total_allocated = 0;
+    total_free = 0;
+    union Header *current = head;
+    while (current) {
+        if (current->s.free) {
+            total_free += current->s.size;
+        } else {
+            total_allocated += current->s.size;
+        }
+        current = current->s.next;
+    }
+}
+
+void print_memory_stats() {
+    update_memory_stats();
+    printf("Total Allocated: %zu bytes\n", total_allocated);
+    printf("Total Free: %zu bytes\n", total_free);
+}
+
 union Header *find_free_block(size_t bsize) {
   union Header *current = head;
   while (current) {
